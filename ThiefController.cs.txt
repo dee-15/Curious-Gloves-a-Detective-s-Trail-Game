@@ -1,0 +1,65 @@
+using UnityEngine;
+
+public class ThiefController : MonoBehaviour
+{
+    public float moveSpeed = 3f;
+    private Rigidbody2D rb;
+    private Vector2 moveDirection = Vector2.right;
+    private bool isCaught = false;
+
+    public TileTypeChecker tileChecker; // ? Reference to TileTypeChecker
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+
+        if (rb == null)
+        {
+            Debug.LogError("Rigidbody2D not found on Thief!");
+        }
+
+        if (tileChecker == null)
+        {
+            Debug.LogError("TileTypeChecker not assigned!");
+        }
+    }
+
+    void Update()
+    {
+        if (!isCaught)
+        {
+            // Optional: add input/AI here to change moveDirection dynamically
+        }
+    }
+
+    void FixedUpdate()
+    {
+        if (!isCaught)
+        {
+            Vector2 targetPosition = rb.position + moveDirection * moveSpeed * Time.fixedDeltaTime;
+
+            // ? Only move if target position is walkable
+            if (tileChecker != null && tileChecker.IsWalkable(targetPosition))
+            {
+                rb.MovePosition(targetPosition);
+            }
+            else
+            {
+                Debug.Log("Blocked by obstacle. Can't move.");
+                // Optional: Reverse or stop movement here
+                moveDirection = -moveDirection; // simple bounce-back logic
+            }
+        }
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Detective"))
+        {
+            isCaught = true;
+            rb.linearVelocity = Vector2.zero;
+            rb.bodyType = RigidbodyType2D.Kinematic;
+            Debug.Log("Thief caught!");
+        }
+    }
+}

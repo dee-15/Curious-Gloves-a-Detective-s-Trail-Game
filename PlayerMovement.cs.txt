@@ -1,0 +1,86 @@
+using UnityEngine;
+
+public class PlayerMovement : MonoBehaviour
+{
+    public float moveSpeed = 5f;
+    public GameObject winPanel;
+
+    private Rigidbody2D rb;
+    private Vector2 movement;
+
+    private bool isGamePaused = false;
+
+    // Position tracking for move counting (tile based)
+    private Vector2 lastMovePosition;
+    private float tileSize = 1f; // Assuming each grid tile is 1 unit
+
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+
+        if (ScoreManager.instance == null)
+        {
+            Debug.LogWarning("ScoreManager instance not found! Please check.");
+        }
+
+        if (winPanel != null)
+        {
+            winPanel.SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning("WinPanel is not assigned in the Inspector!");
+        }
+
+        lastMovePosition = rb.position;
+    }
+
+    void Update()
+    {
+        if (isGamePaused) return;
+
+        // Get raw input
+        movement.x = Input.GetAxisRaw("Horizontal");
+        movement.y = Input.GetAxisRaw("Vertical");
+    }
+
+    void FixedUpdate()
+    {
+        if (isGamePaused) return;
+
+        if (movement.magnitude > 0.01f)
+        {
+            Vector2 normalizedMovement = movement.normalized;
+            Vector2 newPosition = rb.position + normalizedMovement * moveSpeed * Time.fixedDeltaTime;
+
+            rb.MovePosition(newPosition);
+
+            // Check if player moved at least one tile from last recorded position
+            if (Vector2.Distance(newPosition, lastMovePosition) >= tileSize)
+            {
+                ScoreManager.instance?.IncreaseMove();
+                lastMovePosition = newPosition;
+            }
+        }
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        Debug.Log("Trigger hit with: " + other.name);
+
+        if (other.CompareTag("Thief"))
+        {
+            Debug.Log("You caught the thief! You Win!");
+            Time.timeScale = 0f; // Game ko pause karo
+
+            if (winPanel != null)
+            {
+                winPanel.SetActive(true); // Win panel show karo
+            }
+            else
+            {
+                Debug.LogWarning("WinPanel is not assigned in the Inspector!");
+            }
+        }
+    }
+}
