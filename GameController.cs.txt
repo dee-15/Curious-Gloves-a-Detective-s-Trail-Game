@@ -1,0 +1,39 @@
+using UnityEngine;
+
+public class GameController : MonoBehaviour
+{
+    public GridManager gridManager;
+    public MinimaxThiefAI thiefAI;
+
+    public Vector2Int thiefPosition = new(0, 0);
+    public Vector2Int detectivePosition = new(9, 9);
+    public int searchDepth = 3;
+
+    void Start()
+    {
+        // No need for new MinimaxThiefAI() constructor call
+        InvokeRepeating("SimulateTurn", 1f, 1f);
+    }
+
+    void SimulateTurn()
+    {
+        if (thiefPosition == detectivePosition)
+        {
+            Debug.Log("Detective caught the thief!");
+            CancelInvoke();
+            return;
+        }
+
+        // Move thief using Minimax AI + Dijkstra
+        thiefPosition = thiefAI.GetBestMove(thiefPosition, detectivePosition, searchDepth);
+
+        // Move detective towards thief (simple greedy logic here)
+        Vector2Int direction = thiefPosition - detectivePosition;
+        if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
+            detectivePosition.x += (int)Mathf.Sign(direction.x);
+        else
+            detectivePosition.y += (int)Mathf.Sign(direction.y);
+
+        Debug.Log($"Thief: {thiefPosition}, Detective: {detectivePosition}");
+    }
+}

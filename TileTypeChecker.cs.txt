@@ -1,0 +1,37 @@
+using UnityEngine;
+using UnityEngine.Tilemaps;
+
+public class TileTypeChecker : MonoBehaviour
+{
+    public Tilemap walkableTilemap;
+    public Tilemap obstacleTilemap;
+    public Tilemap pathObstacleTilemap;  
+
+    // World Position check
+    public bool IsWalkable(Vector3 worldPosition)
+    {
+        Vector3Int gridPos = walkableTilemap.WorldToCell(worldPosition);
+
+        if (obstacleTilemap.GetTile(gridPos) != null)
+            return false;
+
+        if (pathObstacleTilemap != null && pathObstacleTilemap.GetTile(gridPos) != null)
+            return false;
+
+        return walkableTilemap.GetTile(gridPos) != null;
+    }
+
+    // Grid Position check (used in Dijkstra / Minimax)
+    public bool IsWalkable(Vector2Int gridPosition)
+    {
+        Vector3Int gridPos = (Vector3Int)gridPosition;
+
+        if (obstacleTilemap.GetTile(gridPos) != null)
+            return false;
+
+        if (pathObstacleTilemap != null && pathObstacleTilemap.GetTile(gridPos) != null)
+            return false;
+
+        return walkableTilemap.GetTile(gridPos) != null;
+    }
+}

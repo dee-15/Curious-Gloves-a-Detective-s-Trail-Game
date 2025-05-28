@@ -1,0 +1,50 @@
+using TMPro;
+using UnityEngine;
+
+public class ScoreManager : MonoBehaviour
+{
+    public static ScoreManager instance;
+
+    public TextMeshProUGUI moveCountText;
+
+    private int moveCount = 0;
+
+    private void Awake()
+    {
+        if (instance == null)
+            instance = this;
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+    }
+
+    private void Start()
+    {
+        if (moveCountText == null)
+        {
+            Debug.LogError("Move Count Text is NOT ASSIGNED in the inspector!");
+        }
+
+        UpdateMoveCountUI();
+    }
+
+    public void IncreaseMove()
+    {
+        moveCount++;
+        UpdateMoveCountUI();
+    }
+
+    void UpdateMoveCountUI()
+    {
+        if (moveCountText != null)
+        {
+            moveCountText.text = "Moves: " + moveCount;
+        }
+        else
+        {
+            Debug.LogError("Move Count Text is null!");
+        }
+    }
+}
